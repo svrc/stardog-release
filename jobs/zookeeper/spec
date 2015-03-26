@@ -12,7 +12,7 @@ templates:
   config/zoo.cfg.erb: config/zoo.cfg
   config/zookeeper-env.sh.erb: config/zookeeper-env.sh
   config/java.env.erb: config/java.env
-  config/log4j.properties: config/log4j.properties
+  config/log4j.properties.erb: config/log4j.properties
   config/configuration.xsl: config/configuration.xsl
   data/properties.sh.erb: data/properties.sh
   helpers/ctl_setup.sh: helpers/ctl_setup.sh
@@ -20,13 +20,13 @@ templates:
 properties:
   zookeeper.servers:
     description: List of all zookeeper server host IP/hostnames
-  zookeeper.client_port:
+  zookeeper.client-port:
     description: Port at which the clients will connect to Zookeeper
     default: 2181
-  zookeeper.quorum_port:
+  zookeeper.quorum-port:
     description: Zookeeper Client quorum number
     default: 2888
-  zookeeper.leader_election_port:
+  zookeeper.election-port:
     description: Zookeeper Client leader election number
     default: 3888
   zookeeper.heap:

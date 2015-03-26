@@ -19,10 +19,10 @@ dataDir=/var/vcap/store/zookeeper
 dataLogDir=/var/vcap/sys/log/zookeeper
 
 # the port at which the clients will connect
-clientPort=<%= p("zookeeper.client_port") %>
+clientPort=<%= p("zookeeper.client-port") %>
 
 # ZooKeeper servers and its port no.
 # ZooKeeper ensemble should know about every other machine in the ensemble
-<% p("zookeeper.servers").each_with_index do |server_host, index| %>
-server.<%= index + 1%>=<%= server_host %>:<%= p("zookeeper.quorum_port") %>:<%= p("zookeeper.leader_election_port") %>
+<% p("zookeeper.members").each_with_index do |server_host, index| %>
+server.<%= index + 1%>=<%= server_host %>:<%= p("zookeeper.quorum-port") %>:<%= p("zookeeper.election-port") %>
 <% end %>

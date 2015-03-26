@@ -1,0 +1,95 @@
+---
+name: stardog-627c73044d3bf672b34d
+director_uuid:  ignore
+releases:
+- name: stardog-release
+  version: 0+dev.3
+networks:
+- name: default
+  subnets:
+  - range: 192.168.0.0/23
+    gateway: 192.168.1.254
+    dns:
+    - 192.168.0.251
+    static:
+    - 192.168.0.70
+    - 192.168.0.81
+    - 192.168.0.82
+    reserved:
+    - 192.168.0.1-192.168.0.69
+    - 192.168.0.71-192.168.0.80
+    - 192.168.0.87-192.168.1.253
+    cloud_properties:
+      name: Public Network
+resource_pools:
+- name: stardog-node-partition-09c132d2cb7c2ffa5d65
+  stemcell:
+    name: bosh-vsphere-esxi-ubuntu-trusty-go_agent
+    version: '2811'
+  network: default
+  cloud_properties:
+    ram: 2048
+    disk: 2048
+    cpu: 2
+    datacenters:
+    - clusters:
+      - BoxCluster:
+          resource_pool: ''
+  env:
+    bosh:
+      password: (( bosh_password ))
+compilation:
+  workers: 1
+  network: default
+  cloud_properties:
+    ram: 4096
+    disk: 8192
+    cpu: 4
+update:
+  canaries: 1
+  canary_watch_time: 30000-300000
+  update_watch_time: 30000-300000
+  max_in_flight: 1
+  max_errors: 2
+  serial: true
+jobs:
+- name: stardog-node-partition-09c132d2cb7c2ffa5d65
+  template:
+  - stardog-node
+  - zookeeper
+  release: stardog-release
+  lifecycle: service
+  instances: 3
+  resource_pool: stardog-node-partition-09c132d2cb7c2ffa5d65
+  persistent_disk: 2048
+  networks:
+  - name: default
+    default:
+    - dns
+    - gateway
+    static_ips:
+    - 192.168.0.70
+    - 192.168.0.81
+    - 192.168.0.82
+  properties:
+    networks:
+      apps: default
+    syslog_aggregator:
+      host: 
+      port: 
+      transport: 
+    stardog:
+      cluster_username: f2cdb196a6ca8248bf83
+      cluster_password: ad5c40b129c9af50a627
+    zookeeper:
+      client-port: 2181
+      members:
+      - 192.168.0.70
+      - 192.168.0.81
+      - 192.168.0.82
+      election-port: 3888
+      quorum-port: 2888
+  update:
+    max_in_flight: 2
+    serial: true
+
