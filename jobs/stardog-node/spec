@@ -1,0 +1,34 @@
+---
+name: stardog-node
+templates:
+  bin/ctl: bin/ctl
+  bin/stardog-admin: bin/stardog-admin
+  bin/monit_debugger: bin/monit_debugger
+  helpers/ctl_setup.sh: helpers/ctl_setup.sh
+  helpers/ctl_utils.sh: helpers/ctl_utils.sh
+  config/00-syslog-forward.conf.erb: config/00-syslog-forward.conf
+  config/log4j.properties.erb: config/log4j.proeprties
+  config/stardog.properties.erb: config/stardog.properties
+packages:
+ - java
+ - stardog
+
+properties:
+  networks.apps:
+    description: Network information
+  zookeeper.client-port:
+    description: The port the ZooKeeper client will listen on
+  zookeeper.members:
+    description: The hostname/IP addresses of the ZooKeeper instances
+  syslog_aggregator.host:
+    description: Host of the syslog aggregator
+  syslog_aggregator.port:
+    description: Port of the syslog aggregator
+    default: 514
+  syslog_aggregator.transport:
+    description: Transport to be used when forwarding logs (tcp|udp|relp)
+    default: tcp
+  stardog.cluster_username:
+    description: Username for encrypted data in ZK
+  stardog.cluster_password:
+    description: Password for encrypted data in ZK

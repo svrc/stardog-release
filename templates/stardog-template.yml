@@ -1,0 +1,543 @@
+# Copyright 2014-2015 Pivotal Software, Inc. All Rights Reserved.
+---
+metadata_version: '1.3'
+
+name: stardog
+product_version: '2.2.4'
+rank: 99
+label: Stardog Database
+description: Stardog is an enterprise graph database: search, query, reasoning, and constraints in a lightweight, pure Java system.
+target_installer_version: '1.3.0.0'
+
+requires_product_versions:
+- name: microbosh
+  version: '~> 1.3'
+provides_product_versions:
+- name: p-spring-xd
+  version: '1.0'
+
+releases:
+- name:    stardog
+  version: '1'
+
+stemcell:
+  name:    light-bosh-aws-xen-ubuntu-trusty-go_agent
+  file:    light-bosh-stemcell-2889-aws-xen-ubuntu-trusty-go_agent.tgz
+  version: '2889'
+
+job_types:
+- name: zookeeper
+  resource_label: ZooKeeper
+  description: ZooKeeper Description
+  template: zookeeper
+  release: stardog
+  static_ip: 1
+  dynamic_ip: 0
+  max_in_flight: 2
+  serial: true
+  instance_definitions:
+  - name: instances
+    type: integer
+    configurable: true
+    default: 3
+    constraints:
+      min: 1
+  resource_definitions:
+  - name: ram
+    type: integer
+    configurable: true
+    default: 2_048
+  - name: ephemeral_disk
+    type: integer
+    configurable: true
+    default: 2_048
+  - name: persistent_disk
+    type: integer
+    configurable: true
+    default: 2_048
+  - name: cpu
+    type: integer
+    configurable: true
+    default: 2
+    constraints:
+      min: 1
+      power_of_two: true
+  property_blueprints:
+  - name: vm_credentials
+    type: salted_credentials
+    default:
+      identity: vcap
+  - name: client-port
+    type: port
+    configurable: true
+    default: 2181
+  - name: election-port
+    type: port
+    configurable: true
+    default: 3888
+  - name: heap
+    type: string
+    configurable: true
+    default: 1024M
+  - name: quorum-port
+    type: port
+    configurable: true
+    default: 2888
+  - name: stack-size
+    type: string
+    configurable: true
+    default: 1M
+  manifest: |
+    networks:
+      apps: default
+    syslog_aggregator:
+      host: (( .properties.syslog_host.value ))
+      port: (( .properties.syslog_port.value ))
+      transport: (( .properties.syslog_transport.value ))
+    zookeeper:
+      client-port: (( client-port.value ))
+      election-port: (( election-port.value ))
+      heap: (( heap.value ))
+      members: (( ips ))
+      quorum-port: (( quorum-port.value ))
+      stack-size: (( stack-size.value ))
+- name: stardog
+  resource_label: Stardog Admin
+  description: Spring XD Admin Description
+  template: xd-admin
+  release: p-spring-xd
+  static_ip: 1
+  dynamic_ip: 0
+  max_in_flight: 2
+  serial: true
+  instance_definitions:
+  - name: instances
+    type: integer
+    configurable: true
+    default: 3
+    constraints:
+      min: 1
+  resource_definitions:
+  - name: ram
+    type: integer
+    configurable: true
+    default: 2_048
+  - name: ephemeral_disk
+    type: integer
+    configurable: true
+    default: 4_096
+  - name: persistent_disk
+    type: integer
+    configurable: false
+    default: 0
+  - name: cpu
+    type: integer
+    configurable: true
+    default: 2
+    constraints:
+      min: 1
+      power_of_two: true
+  property_blueprints:
+  - name: vm_credentials
+    type: salted_credentials
+    default:
+      identity: vcap
+  - name: heap
+    type: string
+    configurable: true
+    default: 1024M
+  - name: stack-size
+    type: string
+    configurable: true
+    default: 1M
+  manifest: |
+    networks:
+      apps: default
+    postgresql:
+      database: (( .postgresql.database.value ))
+      leader: (( .postgresql.first_ip ))
+      port: (( .postgresql.port.value ))
+      password: (( .postgresql.password.value ))
+      username: (( .postgresql.username.value ))
+    rabbitmq:
+      leader: (( .rabbitmq.first_ip ))
+      password: (( .rabbitmq.credentials.password ))
+      port: (( .rabbitmq.port.value ))
+      username: (( .rabbitmq.credentials.identity ))
+      vhost: (( .rabbitmq.vhost.value ))
+    sentinel:
+      members: (( .sentinel.ips ))
+      port: (( .sentinel.port.value ))
+    syslog_aggregator:
+      host: (( .properties.syslog_host.value ))
+      port: (( .properties.syslog_port.value ))
+      transport: (( .properties.syslog_transport.value ))
+    xd-admin:
+      heap: (( heap.value ))
+      stack-size: (( stack-size.value ))
+    zookeeper:
+      client-port: (( .zookeeper.client-port.value ))
+      members: (( .zookeeper.ips ))
+- name: service-broker
+  resource_label: Service Broker
+  description: Service Broker Description
+  template: service-broker
+  release: stardog
+  static_ip: 1
+  dynamic_ip: 0
+  max_in_flight: 2
+  serial: true
+  instance_definitions:
+  - name: instances
+    type: integer
+    configurable: true
+    default: 3
+    constraints:
+      min: 1
+  resource_definitions:
+  - name: ram
+    type: integer
+    configurable: true
+    default: 1_024
+  - name: ephemeral_disk
+    type: integer
+    configurable: true
+    default: 2_048
+  - name: persistent_disk
+    type: integer
+    configurable: false
+    default: 0
+  - name: cpu
+    type: integer
+    configurable: true
+    default: 2
+    constraints:
+      min: 1
+      power_of_two: true
+  property_blueprints:
+  - name: vm_credentials
+    type: salted_credentials
+    default:
+      identity: vcap
+  - name: credentials
+    type: simple_credentials
+  - name: dashboard_secret
+    type: secret
+  - name: port
+    type: port
+    configurable: true
+    default: 8080
+  requires_product_versions:
+  - name: cf
+    version: "~> 1.3"
+  manifest: |
+    ers:
+      api-uri:  (( $runtime.system_api_url ))
+      certificate: (( ..cf.ha_proxy.ssl_rsa_certificate.cert_pem ))
+    networks:
+      apps: default
+    postgresql:
+      database: (( .postgresql.database.value ))
+      members: (( .postgresql.ips ))
+      port: (( .postgresql.port.value ))
+      password: (( .postgresql.password.value ))
+      username: (( .postgresql.username.value ))
+    service-broker:
+      dashboard-secret: (( dashboard_secret.secret ))
+      leader: (( first_ip ))
+      password: (( credentials.password ))
+      port: (( port.value ))
+      username: (( credentials.identity ))
+    syslog_aggregator:
+      host: (( .properties.syslog_host.value ))
+      port: (( .properties.syslog_port.value ))
+      transport: (( .properties.syslog_transport.value ))
+- name: service-broker-register
+  resource_label: Service Broker Registrar (Register)
+  description: Register the Service Broker with the Elastic Runtime Service and makes all plans public
+  template: service-broker-register
+  errand: true
+  release: stardog
+  static_ip: 0
+  dynamic_ip: 1
+  max_in_flight: 1
+  serial: true
+  instance_definitions:
+  - name: instances
+    type: integer
+    configurable: false
+    default: 1
+  resource_definitions:
+  - name: ram
+    type: integer
+    configurable: true
+    default: 1_024
+  - name: ephemeral_disk
+    type: integer
+    configurable: true
+    default: 2_048
+  - name: persistent_disk
+    type: integer
+    configurable: false
+    default: 0
+  - name: cpu
+    type: integer
+    configurable: true
+    default: 1
+    constraints:
+      min: 1
+      power_of_two: true
+  property_blueprints:
+  - name: vm_credentials
+    type: salted_credentials
+    default:
+      identity: vcap
+  requires_product_versions:
+  - name: cf
+    version: "~> 1.3"
+  manifest: |
+    ers:
+      admin-password: (( ..cf.uaa.admin_credentials.password ))
+      admin-username: (( ..cf.uaa.admin_credentials.identity ))
+      api-uri:  (( $runtime.system_api_url ))
+      skip-ssl-validation: (( ..cf.ha_proxy.skip_cert_verify.value ))
+    service-broker:
+      leader: (( .service-broker.first_ip ))
+      password: (( .service-broker.credentials.password ))
+      port: (( .service-broker.port.value ))
+      username: (( .service-broker.credentials.identity ))
+- name: service-broker-deregister
+  resource_label: Service Broker Registrar (Deregister)
+  description: Deregister the Service Broker from the Elastic Runtime Service
+  template: service-broker-deregister
+  errand: true
+  release: stardog
+  static_ip: 0
+  dynamic_ip: 1
+  max_in_flight: 1
+  serial: true
+  instance_definitions:
+  - name: instances
+    type: integer
+    configurable: false
+    default: 1
+  resource_definitions:
+  - name: ram
+    type: integer
+    configurable: true
+    default: 1_024
+  - name: ephemeral_disk
+    type: integer
+    configurable: true
+    default: 2_048
+  - name: persistent_disk
+    type: integer
+    configurable: false
+    default: 0
+  - name: cpu
+    type: integer
+    configurable: true
+    default: 1
+    constraints:
+      min: 1
+      power_of_two: true
+  property_blueprints:
+  - name: vm_credentials
+    type: salted_credentials
+    default:
+      identity: vcap
+  requires_product_versions:
+  - name: cf
+    version: "~> 1.3"
+  manifest: |
+    ers:
+      admin-password: (( ..cf.uaa.admin_credentials.password ))
+      admin-username: (( ..cf.uaa.admin_credentials.identity ))
+      api-uri:  (( $runtime.system_api_url ))
+      skip-ssl-validation: (( ..cf.ha_proxy.skip_cert_verify.value ))
+- name: compilation
+  resource_label: Compilation
+  decription: Compilation Description
+  static_ip: 0
+  dynamic_ip: 1
+  max_in_flight: 2
+  instance_definitions:
+  - name: instances
+    type: integer
+    default: 2
+    configurable: true
+    constraints:
+      min: 1
+  resource_definitions:
+  - name: ram
+    type: integer
+    default: 4_096
+    configurable: true
+    constraints:
+      min: 1_024
+  - name: ephemeral_disk
+    type: integer
+    default: 8_192
+    configurable: true
+    constraints:
+      min: 8_192
+  - name: persistent_disk
+    type: integer
+    default: 0
+    configurable: false
+  - name: cpu
+    type: integer
+    default: 8
+    configurable: true
+    constraints:
+      min: 1
+      power_of_two: true
+
+post_deploy_errands:
+- name: service-broker-register
+pre_delete_errands:
+- name: service-broker-deregister
+
+property_blueprints:
+- name: syslog_host
+  type: network_address
+  configurable: true
+  optional: true
+- name: syslog_port
+  type: port
+  configurable: true
+  optional: true
+- name: syslog_transport
+  type: dropdown_select
+  configurable: true
+  optional: true
+  options:
+  - name: tcp
+    label: TCP protocol
+    default: true
+  - name: relp
+    label: RELP protocol
+  - name: udp
+    label: UDP protocol
+
+form_types:
+- name: syslog_aggregator
+  label: Syslog Aggregator
+  description: Forwards syslog messages to an external server. Leave these options blank unless you are providing a syslogd server.
+  property_inputs:
+  - reference: ".syslog_host"
+    label: IP Address of Syslog Aggregator Host
+    description: The host must be reachable from the Spring XD network, accept TCP, UDP or RELP connections, and use the RELP protocol (e.g. rsyslogd).
+  - reference: ".syslog_port"
+    label: Syslog Aggregator Port
+    description: The typical syslogd port is 514. Ensure syslogd is listening on external interfaces.
+  - reference: ".syslog_transport"
+    label: Networking Transport
+    description: Transport to be used when forwarding logs
+- name: postgresql
+  label: PostgreSQL
+  description: PostgreSQL Configuration
+  property_inputs:
+  - reference: postgresql.database
+    label: Database
+    description: The PostgreSQL database Stardog will use for the service broker q
+  - reference: postgresql.port
+    label: Port
+    description: The port PostgreSQL will listen on
+  - reference: postgresql.username
+    label: Username
+    description: The username PostgreSQL will use
+  - reference: postgresql.password
+    label: Password
+    description: The password PostgreSQL will use
+- name: rabbitmq
+  label: RabbitMQ
+  description: RabbitMQ Configuration
+  property_inputs:
+  - reference: rabbitmq.port
+    label: Port
+    description: The port RabbitMQ will listen on
+  - reference: rabbitmq.vhost
+    label: Virtual Host
+    description: The virtual host RabbitMQ will listen on
+  - reference: rabbitmq.management-port
+    label: Management Port
+    description: The port RabbitMQ Management Plugin will listen on
+- name: redis
+  label: Redis
+  description: Redis Configuration
+  property_inputs:
+  - reference: redis.port
+    label: Port
+    description: The port Redis will listen on
+- name: sentinel
+  label: Sentinel
+  description: Sentinel Configuration
+  property_inputs:
+  - reference: sentinel.port
+    label: Port
+    description: The port Sentinel will listen on
+- name: service-broker
+  label: Service Broker
+  description: Service Broker Configuration
+  property_inputs:
+  - reference: service-broker.port
+    label: Port
+    description: The port Service Broker will listen on
+- name: xd-admin
+  label: Spring XD Admin Servers
+  description: Spring XD Admin Server Configuration
+  property_inputs:
+  - reference: xd-admin.heap
+    label: Heap Size
+    description: The amount of memory assigned to XD Admin (e.g. 1024M, 2G)
+  - reference: xd-admin.stack-size
+    label: Stack Size
+    description: The amount of memory assigned to the stack for each thread (e.g. 512K, 1M)
+- name: xd-container
+  label: Spring XD Containers
+  description: Spring XD Container Configuration
+  property_inputs:
+  - reference: xd-container.hadoop
+    label: Hadoop Distribution
+    description: The type of Hadoop distribution to connect to
+  - reference: xd-container.ack-mode
+    label: Message Bus ackMode
+    description: The ackMode of the Message Bus
+  - reference: xd-container.concurrency
+    label: Message Bus concurrency
+    description: The concurrency of the Message Bus
+  - reference: xd-container.max-concurrency
+    label: Message Bus maxConcurrency
+    description: The maxConcurrency of the Message Bus
+  - reference: xd-container.prefetch
+    label: Message Bus prefetch
+    description: The prefetch of the Message Bus
+  - reference: xd-container.tx-size
+    label: Message Bus txSize
+    description: The txSize of the Message Bus
+  - reference: xd-container.heap
+    label: Heap Size
+    description: The amount of memory assigned to XD Container (e.g. 1024M, 2G)
+  - reference: xd-container.stack-size
+    label: Stack Size
+    description: The amount of memory assigned to the stack for each thread (e.g. 512K, 1M)
+- name: zookeeper
+  label: ZooKeeper
+  description: ZooKeeper Configuration
+  property_inputs:
+  - reference: zookeeper.client-port
+    label: Client Port
+    description: The port the ZooKeeper client will listen on
+  - reference: zookeeper.election-port
+    label: Election Port
+    description: The port ZooKeeper will listen on for leader elections
+  - reference: zookeeper.heap
+    label: Heap Size
+    description: The amount of memory assigned to ZooKeeper (e.g. 1024M, 2G)
+  - reference: zookeeper.quorum-port
+    label: Quorum Port
+    description: The port ZooKeeper will listen on for quorum communication
+  - reference: zookeeper.stack-size
+    label: Stack Size
+    description: The amount of memory assigned to the stack for each thread (e.g. 512K, 1M)

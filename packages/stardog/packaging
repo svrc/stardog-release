@@ -1,0 +1,10 @@
+# abort script on any command that exits with a non zero value
+set -e
+
+VERSION=3.0
+
+pushd $(mktemp -d -t stardog.XXXXXXXX) || exit 1
+	unzip "${BOSH_COMPILE_TARGET}/stardog/stardog-${VERSION}.zip"
+	mv "stardog-${VERSION}"/* "${BOSH_INSTALL_TARGET}"
+popd
+

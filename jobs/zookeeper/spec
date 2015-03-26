@@ -1,0 +1,47 @@
+---
+name: zookeeper
+packages:
+- java
+- stardog
+templates:
+  bin/zookeeper_ctl: bin/zookeeper_ctl
+  bin/monit_debugger: bin/monit_debugger
+  bin/stardog-admin: bin/stardog-admin
+  config/myid.erb: config/myid
+  config/00-syslog-forward.conf.erb: config/00-syslog-forward.conf
+  config/zoo.cfg.erb: config/zoo.cfg
+  config/zookeeper-env.sh.erb: config/zookeeper-env.sh
+  config/java.env.erb: config/java.env
+  config/log4j.properties: config/log4j.properties
+  config/configuration.xsl: config/configuration.xsl
+  data/properties.sh.erb: data/properties.sh
+  helpers/ctl_setup.sh: helpers/ctl_setup.sh
+  helpers/ctl_utils.sh: helpers/ctl_utils.sh
+properties:
+  zookeeper.servers:
+    description: List of all zookeeper server host IP/hostnames
+  zookeeper.client_port:
+    description: Port at which the clients will connect to Zookeeper
+    default: 2181
+  zookeeper.quorum_port:
+    description: Zookeeper Client quorum number
+    default: 2888
+  zookeeper.leader_election_port:
+    description: Zookeeper Client leader election number
+    default: 3888
+  zookeeper.heap:
+    description: The amount of heap allocated to the ZooKeeper instance
+    default: 1024M
+  zookeeper.stack_size:
+    description: The amount of stack allocated to the ZooKeeper instance
+    default: 1M
+  syslog_aggregator.host:
+    description: Host of the syslog aggregator
+  syslog_aggregator.port:
+    description: Port of the syslog aggregator
+    default: 514
+  syslog_aggregator.transport:
+    description: Transport to be used when forwarding logs (tcp|udp|relp)
+    default: tcp
+  networks.apps:
+    description: CF Network information

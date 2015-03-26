@@ -1,0 +1,4 @@
+# abort script on any command that exits with a non zero value
+set -e
+
+mv ${BOSH_COMPILE_TARGET}/slf4j-log4j12/* ${BOSH_INSTALL_TARGET}

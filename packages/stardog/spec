@@ -1,0 +1,7 @@
+---
+name: stardog
+
+dependencies:
+
+files:
+ - stardog/stardog-3.0.zip
