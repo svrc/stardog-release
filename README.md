@@ -7,11 +7,11 @@ This is a modification of the Zookeeper BOSH release (open source), extra bits f
 unnecessary with stardog still need to be removed.
 
 Bugs:
-# properites.sh -- get rid of it
-# BOSH persistent disk /var/vcap/store should be used for $STARDOG_HOME on stardog-node jobs
-# log4j.proeprties filename typo
-# Zookeeper PIDFILE is in wrong location, currently export PIDFILE=/var/vcap/store/zookeeper/zookeeper_server.pid
-# slf4j package in stardog-node should be configured to use log4j
-# Remove "stardog-3.0" from STARDOG_INSTALL=${JOB_DIR}/packages/stardog/stardog-3.0"
+- properites.sh -- get rid of it
+- BOSH persistent disk /var/vcap/store should be used for $STARDOG_HOME on stardog-node jobs
+- log4j.proeprties filename typo
+- Zookeeper PIDFILE is in wrong location, currently export PIDFILE=/var/vcap/store/zookeeper/zookeeper_server.pid
+- slf4j package in stardog-node should be configured to use log4j
+- Remove "stardog-3.0" from STARDOG_INSTALL=${JOB_DIR}/packages/stardog/stardog-3.0"
 
 
